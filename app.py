@@ -9,7 +9,7 @@ st.title("Vietnamese Food VQA - Tool Gán Nhãn Đồ Ăn")
 # 0. KHỞI TẠO KẾT NỐI SUPABASE
 # ==========================================
 SUPABASE_URL = "https://cvdoasxazyruytejluvv.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2ZG9hc3hhenlydXl0ZWpsdXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMTM3NzEsImV4cCI6MjA4ODc4OTc3MX0.jWnKQXoKlXOJXua-Q0Z5Dcqq5kLhXD7rmIA2w7FogSg" # <-- Dán key ẩn danh vào đây
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"] 
 
 @st.cache_resource
 def init_connection():
@@ -49,7 +49,6 @@ if not list_response.data:
 
 all_ids = [row["image_id"] for row in list_response.data]
 
-# --- FIX LỖI Ở ĐÂY: Đồng bộ biến trung gian vào Selectbox ---
 if "next_img_id" in st.session_state:
     if st.session_state.next_img_id in all_ids:
         st.session_state.selected_img = st.session_state.next_img_id
@@ -137,7 +136,7 @@ if st.button("Lưu", type="primary", use_container_width=True):
         "is_checked": True
     }).eq("image_id", img_id).execute()
     
-    # --- FIX LỖI Ở ĐÂY: Lưu ID ảnh kế tiếp vào biến trung gian ---
+    # Lưu ID ảnh kế tiếp vào biến trung gian
     if view_mode == "Hiện toàn bộ":
         current_idx = all_ids.index(selected_id)
         if current_idx + 1 < len(all_ids):

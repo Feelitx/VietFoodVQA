@@ -95,14 +95,14 @@ def load_image_annotation_page() -> None:
     filter_is_drop = st.sidebar.selectbox(
         "Lọc theo is_drop:",
         ["Tất cả", "True", "False"],
-        index=0,
+        index=2,
         key="img_filter_drop",
     )
 
     filter_is_checked = st.sidebar.selectbox(
         "Lọc theo is_checked:",
         ["Tất cả", "True", "False"],
-        index=0,
+        index=2,
         key="img_filter_checked",
     )
 

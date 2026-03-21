@@ -89,7 +89,7 @@ def fetch_question_types() -> list[str]:
 def load_image_annotation_page() -> None:
     st.sidebar.header("Chọn ảnh")
     start_id = st.sidebar.text_input("Từ ID (VD: image000000):", value="image000000", key="img_start")
-    end_id = st.sidebar.text_input("Đến ID (VD: image000100):", value="image000100", key="img_end")
+    end_id = st.sidebar.text_input("Đến ID (VD: image000100):", value="image001000", key="img_end")
 
     st.sidebar.markdown("---")
     filter_is_drop = st.sidebar.selectbox(

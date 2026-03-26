@@ -386,60 +386,81 @@ def render_verify_summary(scores: dict[str, int]) -> tuple[str, str]:
 
     return auto_decision, auto_rule
 
-
 def fetch_vqa_rows(
-    start_id: str,
-    end_id: str,
+    start_vqa_id: int,
+    end_vqa_id: int,
     vqa_is_drop: str,
     vqa_is_checked: str,
     qtype_filter: str,
     split_filter: str,
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
-    eligible_image_ids = fetch_image_ids_for_filter(start_id, end_id)
-    if not eligible_image_ids:
-        return [], {}
-
-    image_rows = (
-        supabase.table("image")
-        .select("image_id,image_url,food_items,image_desc,is_checked,is_drop")
-        .in_("image_id", eligible_image_ids)
-        .execute()
-        .data
-        or []
-    )
-    image_map = {row["image_id"]: row for row in image_rows if row.get("image_id")}
-
     select_cols = "vqa_id,image_id,qtype,question,is_checked,is_drop"
+
+    if column_exists("vqa", "split"):
+        select_cols += ",split"
     if column_exists("vqa", "triples_used"):
         select_cols += ",triples_used"
     if column_exists("vqa", "triples_retrieved"):
         select_cols += ",triples_retrieved"
 
-    vqa_rows: list[dict[str, Any]] = []
-    chunk_size = 200
-    for i in range(0, len(eligible_image_ids), chunk_size):
-        chunk_ids = eligible_image_ids[i:i + chunk_size]
-        query = (
-            supabase.table("vqa")
-            .select(select_cols)
-            .in_("image_id", chunk_ids)
-            .order("image_id")
-            .order("vqa_id")
-        )
-        query = apply_bool_filter(query, "is_drop", vqa_is_drop)
-        query = apply_bool_filter(query, "is_checked", vqa_is_checked)
-        if qtype_filter != "Tất cả":
-            query = query.eq("qtype", qtype_filter)
-        if split_filter != "Tất cả":
-            query = query.eq("split", split_filter)
-        resp, err = execute_query(query)
-        if err is not None:
-            raise err
-        vqa_rows.extend(resp.data or [])
+    query = (
+        supabase.table("vqa")
+        .select(select_cols)
+        .gte("vqa_id", start_vqa_id)
+        .lte("vqa_id", end_vqa_id)
+        .order("vqa_id")
+    )
 
-    vqa_rows = [row for row in vqa_rows if row.get("image_id") in image_map]
+    query = apply_bool_filter(query, "is_drop", vqa_is_drop)
+    query = apply_bool_filter(query, "is_checked", vqa_is_checked)
+
+    if qtype_filter != "Tất cả":
+        query = query.eq("qtype", qtype_filter)
+
+    if split_filter != "Tất cả" and column_exists("vqa", "split"):
+        query = query.eq("split", split_filter)
+
+    resp, err = execute_query(query)
+    if err is not None:
+        raise err
+
+    vqa_rows = resp.data or []
+    if not vqa_rows:
+        return [], {}
+
+    image_ids = sorted(
+        {
+            row["image_id"]
+            for row in vqa_rows
+            if row.get("image_id")
+        }
+    )
+
+    image_query = (
+        supabase.table("image")
+        .select("image_id,image_url,food_items,image_desc,is_checked,is_drop")
+        .in_("image_id", image_ids)
+        .eq("is_checked", True)
+        .eq("is_drop", False)
+    )
+    image_resp, image_err = execute_query(image_query)
+    if image_err is not None:
+        raise image_err
+
+    image_rows = image_resp.data or []
+    image_map = {
+        row["image_id"]: row
+        for row in image_rows
+        if row.get("image_id")
+    }
+
+    vqa_rows = [
+        row
+        for row in vqa_rows
+        if row.get("image_id") in image_map
+    ]
+
     return vqa_rows, image_map
-
 
 def load_vqa_detail(vqa_id: int) -> dict[str, Any] | None:
     resp, err = execute_query(
@@ -931,9 +952,21 @@ def render_schema_warnings() -> None:
 
 def load_vqa_verify_page() -> None:
     st.sidebar.header("Verify VQA")
-    start_id = st.sidebar.text_input("Từ ID ảnh (VD: image000000):", value="image000000", key="vqa_start")
-    end_id = st.sidebar.text_input("Đến ID ảnh (VD: image001000):", value="image001000", key="vqa_end")
+    start_vqa_id = st.sidebar.number_input(
+        "Từ VQA ID:",
+        min_value=1,
+        value=1,
+        step=1,
+        key="vqa_start_id",
+    )
 
+    end_vqa_id = st.sidebar.number_input(
+        "Đến VQA ID:",
+        min_value=1,
+        value=1000,
+        step=1,
+        key="vqa_end_id",
+    )
     st.sidebar.markdown("---")
     filter_is_drop = st.sidebar.selectbox(
         "Lọc theo vqa.is_drop:",
@@ -982,13 +1015,17 @@ def load_vqa_verify_page() -> None:
     render_schema_warnings()
 
     try:
+        if start_vqa_id > end_vqa_id:
+            st.warning("`Từ VQA ID` phải nhỏ hơn hoặc bằng `Đến VQA ID`.")
+            return
+
         vqa_rows, image_map = fetch_vqa_rows(
-            start_id,
-            end_id,
+            start_vqa_id,
+            end_vqa_id,
             filter_is_drop,
             filter_is_checked,
             qtype_filter,
-            split_filter
+            split_filter,
         )
     except Exception as exc:  # noqa: BLE001
         st.error(f"Không tải được danh sách VQA: {exc}")
@@ -1011,7 +1048,7 @@ def load_vqa_verify_page() -> None:
         question = norm_text(row.get("question"))
         preview = (question[:55] + "...") if len(question) > 58 else question
         split_text = row.get("split") or "-"
-        return f"{row['image_id']} | {split_text} | {row.get('qtype') or '-'} | #{vqa_id} | {preview}"
+        return f"#{vqa_id} | {split_text} | {row.get('qtype') or '-'} | {row['image_id']} | {preview}"
 
     selected_vqa_id = st.sidebar.selectbox(
         "Chọn VQA để verify:",

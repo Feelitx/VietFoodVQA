@@ -20,8 +20,19 @@ let relations: string[] = [];
 async function initSidebar() {
   try { relations = await (await fetch('/api/meta/relations')).json(); } catch { relations = []; }
 
+  let prog = { verified_count: 0, unverified_count: 0 };
+  try { prog = await (await fetch('/api/kg/progress')).json(); } catch {}
+  const total = prog.verified_count + prog.unverified_count;
+  const pct = total ? Math.round((prog.verified_count / total) * 100) : 0;
+
   const el = document.getElementById(CONTROLS_ID)!;
   el.innerHTML = `
+    <div class="metrics" style="margin-top:0; gap:8px;">
+      <div class="metric" style="padding:10px 15px; min-width:unset;"><div class="metric-label" style="font-size:.65rem">Đã duyệt</div><div class="metric-value" style="font-size:1.25rem; font-weight:900">\${prog.verified_count}</div></div>
+      <div class="metric" style="padding:10px 15px; min-width:unset;"><div class="metric-label" style="font-size:.65rem">Chưa duyệt</div><div class="metric-value" style="font-size:1.25rem">\${prog.unverified_count}</div></div>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:16px"><div class="progress-bar" style="width:\${pct}%"></div></div>
+    
     <div class="card-title" style="margin-top:4px">Lọc Triples</div>
     <div class="form-group">
       <label>is_checked</label>
@@ -151,17 +162,17 @@ function renderTripleDetail(row: any) {
       <div>
         <div class="card">
           <div class="card-title">Thông tin triple</div>
-          <div style="margin-bottom:8px">
-            <span class="badge badge-gray">Subject</span>
-            <span style="margin-left:6px">${normText(row.subject)}</span>
+          <div class="form-group" style="margin-bottom:12px">
+            <label style="display:flex; align-items:center; gap:6px; margin-bottom:6px"><span class="badge badge-gray">Subject</span></label>
+            <textarea id="edit-sub" rows="2" style="resize:vertical; font-family:monospace; line-height:1.4">${normText(row.subject)}</textarea>
           </div>
-          <div style="margin-bottom:8px">
-            <span class="badge badge-blue">Relation</span>
-            <span style="margin-left:6px">${normText(row.relation)}</span>
+          <div class="form-group" style="margin-bottom:12px">
+            <label style="display:flex; align-items:center; gap:6px; margin-bottom:6px"><span class="badge badge-blue">Relation</span></label>
+            <input type="text" id="edit-rel" value="${row.relation ? String(row.relation).replace(/"/g, '&quot;') : ''}" style="font-family:monospace" />
           </div>
-          <div style="margin-bottom:10px">
-            <span class="badge badge-gray">Target</span>
-            <span style="margin-left:6px">${normText(row.target)}</span>
+          <div class="form-group" style="margin-bottom:12px">
+            <label style="display:flex; align-items:center; gap:6px; margin-bottom:6px"><span class="badge badge-gray">Target</span></label>
+            <textarea id="edit-targ" rows="2" style="resize:vertical; font-family:monospace; line-height:1.4">${normText(row.target)}</textarea>
           </div>
           ${row.evidence ? `<div class="muted" style="margin-bottom:6px"><b>Evidence:</b> ${normText(row.evidence)}</div>` : '<div class="muted">Không có evidence.</div>'}
           ${row.source_url && row.source_url !== 'LLM_Knowledge'
@@ -252,6 +263,10 @@ async function saveTriple() {
     alertEl.innerHTML = '<div class="alert alert-error">Vui lòng chọn verdict.</div>';
     return;
   }
+  
+  const subInp = document.getElementById('edit-sub') as HTMLTextAreaElement;
+  const relInp = document.getElementById('edit-rel') as HTMLInputElement;
+  const targInp = document.getElementById('edit-targ') as HTMLTextAreaElement;
 
   btn.disabled = true; btn.textContent = 'Đang lưu…';
   alertEl.innerHTML = '';
@@ -260,7 +275,12 @@ async function saveTriple() {
     const resp = await fetch(`/api/kg/${currentId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ verdict }),
+      body: JSON.stringify({ 
+        verdict,
+        subject: subInp.value,
+        relation: relInp.value,
+        target: targInp.value
+      }),
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error ?? 'Lỗi lưu');
@@ -269,6 +289,9 @@ async function saveTriple() {
     if (tripleMap[currentId]) {
       tripleMap[currentId].is_checked = verdict !== 'unsure';
       tripleMap[currentId].is_drop = verdict === 'invalid';
+      tripleMap[currentId].subject = subInp.value;
+      tripleMap[currentId].relation = relInp.value;
+      tripleMap[currentId].target = targInp.value;
     }
     const idx = allIds.findIndex(id => String(id) === String(currentId));
     if (idx + 1 < allIds.length) {

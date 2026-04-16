@@ -25,6 +25,9 @@ export const PATCH: APIRoute = async ({ params, request }) => {
     is_checked: verdict === 'valid' || verdict === 'invalid',
     is_drop: verdict === 'invalid',
   };
+  if (body.subject !== undefined) payload.subject = body.subject;
+  if (body.relation !== undefined) payload.relation = body.relation;
+  if (body.target !== undefined) payload.target = body.target;
   if (await columnExists(supabase, 'kg_triple_catalog', 'updated_at')) payload.updated_at = nowIso();
 
   const { error } = await supabase.from('kg_triple_catalog').update(payload).eq('triple_id', id);

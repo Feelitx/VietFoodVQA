@@ -21,9 +21,9 @@
 
       @layer components {
         .app { @apply flex w-full h-screen overflow-hidden relative; }
-        .sidebar { @apply w-72 shrink-0 bg-white/60 dark:bg-zinc-950/80 backdrop-blur-xl border-r border-slate-200 dark:border-white/10 flex flex-col h-full overflow-hidden absolute inset-y-0 left-0 z-40 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300; }
+        .sidebar { @apply w-72 shrink-0 bg-white/60 dark:bg-zinc-950/80 backdrop-blur-xl border-r border-slate-200 dark:border-white/10 flex flex-col h-full overflow-hidden absolute inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300; }
         .sidebar.open { @apply translate-x-0; }
-        .sidebar-overlay { @apply fixed inset-0 bg-slate-900/20 dark:bg-black/50 z-30 hidden md:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0; }
+        .sidebar-overlay { @apply fixed inset-0 bg-slate-900/20 dark:bg-black/50 z-30 hidden backdrop-blur-sm transition-opacity duration-300 opacity-0; }
         .sidebar-overlay.open { @apply block opacity-100; }
         .sidebar-logo { @apply p-6 border-b border-slate-200 dark:border-white/10 flex items-center justify-between; }
         .sidebar-logo > div { @apply text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400 tracking-tight; }
@@ -126,7 +126,7 @@
             <div>🍜 VietFoodVQA</div>
             <span>Annotation & Verify Tool</span>
           </div>
-          <button id="close-sidebar" class="md:hidden p-1 text-slate-500 dark:text-zinc-400">
+          <button id="close-sidebar" class="p-1 text-slate-500 dark:text-zinc-400">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
           </button>
         </div>
@@ -155,8 +155,8 @@
         </div>
       </nav>
       <main class="main custom-scrollbar">
-        <!-- Mobile Header Bar -->
-        <div class="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/10 sticky top-0 z-20 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md">
+        <!-- Header Bar -->
+        <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/10 sticky top-0 z-20 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md">
           <div class="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400">🍜 VietFoodVQA</div>
           <button id="open-sidebar" class="p-2 -mr-2 text-slate-700 dark:text-zinc-300 active:scale-95 transition-transform">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"></path></svg>
@@ -218,10 +218,10 @@
       closeBtn?.addEventListener('click', closeMenu);
       overlay?.addEventListener('click', closeMenu);
 
-      // Close sidebar if user clicks a nav link on mobile
+      // Close sidebar if user clicks a nav link
       document.querySelectorAll('.nav a').forEach(a => {
         a.addEventListener('click', () => {
-          if (window.innerWidth < 768) closeMenu();
+          closeMenu();
         });
       });
     </script>

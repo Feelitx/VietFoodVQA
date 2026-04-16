@@ -112,7 +112,7 @@ function updateSbSelect() {
 function updatePos() {
   const el = document.getElementById('sb-pos');
   if (!el) return;
-  const i = allVqaIds.indexOf(currentVqaId);
+  const i = allVqaIds.findIndex(id => String(id) === String(currentVqaId));
   el.textContent = i >= 0 ? `${i+1} / ${allVqaIds.length}` : '';
 }
 
@@ -190,7 +190,7 @@ function setRoot(html: string) { const el = document.getElementById(ROOT_ID); if
 function renderVqaDetail() {
   const row = fullVqaRow;
   const imgRow = imageMap[row.image_id] ?? {};
-  const idx = allVqaIds.indexOf(currentVqaId);
+  const idx = allVqaIds.findIndex(id => String(id) === String(currentVqaId));
 
   const defScores = {
     q0: getExistingVerifyValue(row,'q0',3),
@@ -615,7 +615,7 @@ async function saveVqa() {
     progress.verified_count++;
     progress.unverified_count = Math.max(0, progress.unverified_count - 1);
 
-    const idx = allVqaIds.indexOf(currentVqaId);
+    const idx = allVqaIds.findIndex(id => String(id) === String(currentVqaId));
     if (idx + 1 < allVqaIds.length) {
       setTimeout(() => selectVqa(allVqaIds[idx + 1]), 600);
     }

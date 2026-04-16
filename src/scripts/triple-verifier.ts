@@ -108,7 +108,7 @@ function updateSbSelect() {
 function updatePos() {
   const el = document.getElementById('sb-pos');
   if (!el) return;
-  const i = allIds.indexOf(currentId);
+  const i = allIds.findIndex(id => String(id) === String(currentId));
   el.textContent = i >= 0 ? `${i+1} / ${allIds.length}` : '';
 }
 
@@ -132,7 +132,7 @@ function renderTripleDetail(row: any) {
   if (!row) { setRoot('<div class="alert alert-error">Không tìm thấy triple.</div>'); return; }
   const chk = row.is_checked ? '<span class="badge badge-green">✓ Đã duyệt</span>' : '<span class="badge badge-yellow">○ Chưa duyệt</span>';
   const drp = row.is_drop ? '<span class="badge badge-red">🗑 Drop</span>' : '<span class="badge badge-blue">✅ Giữ lại</span>';
-  const idx = allIds.indexOf(currentId);
+  const idx = allIds.findIndex(id => String(id) === String(currentId));
 
   let defaultVerdict = 'unsure';
   if (row.is_checked === true) defaultVerdict = row.is_drop ? 'invalid' : 'valid';
@@ -261,7 +261,7 @@ async function saveTriple() {
       tripleMap[currentId].is_checked = verdict !== 'unsure';
       tripleMap[currentId].is_drop = verdict === 'invalid';
     }
-    const idx = allIds.indexOf(currentId);
+    const idx = allIds.findIndex(id => String(id) === String(currentId));
     if (idx + 1 < allIds.length) {
       setTimeout(() => selectTriple(String(allIds[idx + 1])), 500);
     }

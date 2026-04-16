@@ -178,8 +178,10 @@ function renderTripleDetail(row: any) {
 
       <div>
         <div class="card">
-          <div class="card-title">Linked VQAs</div>
-          <div class="loading-center" id="linked-vqas-area"><div class="spinner"></div></div>
+          <div class="card-title" style="margin-bottom:12px">Linked VQAs</div>
+          <div id="linked-vqas-area" class="custom-scrollbar" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:8px">
+            <div class="loading-center" style="width:100%"><div class="spinner"></div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -226,13 +228,20 @@ function renderLinkedVqas(rows: any[]) {
     if (row.is_retrieved) badges.push('<span class="badge badge-blue">retrieved</span>');
     if (row.is_used) badges.push('<span class="badge badge-yellow">used</span>');
     return `
-      <div class="triple-card" style="margin-bottom:8px">
+      <div class="triple-card" style="flex:0 0 280px; margin-bottom:0">
         <div style="font-weight:600;font-size:.85rem">VQA #${row.vqa_id} | ${row.image_id ?? '-'} | ${row.qtype ?? '-'}</div>
         <div class="muted" style="margin:4px 0">${normText(row.question) || '(trống)'}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">${badges.join('')}</div>
       </div>
     `;
   }).join('');
+
+  area.onwheel = (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      area.scrollBy({ left: e.deltaY > 0 ? 300 : -300, behavior: 'smooth' });
+    }
+  };
 }
 
 async function saveTriple() {

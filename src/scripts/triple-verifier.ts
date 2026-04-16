@@ -15,24 +15,36 @@ let allIds: string[] = [];
 let tripleMap: Record<string, any> = {};
 let currentId: string = '';
 let relations: string[] = [];
+let globalProg = { verified_count: 0, unverified_count: 0 };
+
+function renderProgressBar() {
+  let container = document.getElementById('main-progress');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'main-progress';
+    const title = document.querySelector('.page-title');
+    if (title) title.insertAdjacentElement('afterend', container);
+  }
+  const total = globalProg.verified_count + globalProg.unverified_count;
+  const pct = total ? Math.round((globalProg.verified_count / total) * 100) : 0;
+  container.innerHTML = `
+    <div class="metrics" style="margin-bottom:24px; gap:8px;">
+      <div class="metric" style="padding:15px; min-width:unset;"><div class="metric-label" style="font-size:.70rem">Đã duyệt</div><div class="metric-value" style="font-size:1.5rem; font-weight:900">${globalProg.verified_count}</div></div>
+      <div class="metric" style="padding:15px; min-width:unset;"><div class="metric-label" style="font-size:.70rem">Chưa duyệt</div><div class="metric-value" style="font-size:1.5rem">${globalProg.unverified_count}</div></div>
+    </div>
+    <div class="progress-wrap" style="margin-top:-8px; margin-bottom:32px"><div class="progress-bar" style="width:${pct}%"></div></div>
+  `;
+}
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 async function initSidebar() {
   try { relations = await (await fetch('/api/meta/relations')).json(); } catch { relations = []; }
 
-  let prog = { verified_count: 0, unverified_count: 0 };
-  try { prog = await (await fetch('/api/kg/progress')).json(); } catch {}
-  const total = prog.verified_count + prog.unverified_count;
-  const pct = total ? Math.round((prog.verified_count / total) * 100) : 0;
+  try { globalProg = await (await fetch('/api/kg/progress')).json(); } catch {}
+  renderProgressBar();
 
   const el = document.getElementById(CONTROLS_ID)!;
   el.innerHTML = `
-    <div class="metrics" style="margin-top:0; gap:8px;">
-      <div class="metric" style="padding:10px 15px; min-width:unset;"><div class="metric-label" style="font-size:.65rem">Đã duyệt</div><div class="metric-value" style="font-size:1.25rem; font-weight:900">\${prog.verified_count}</div></div>
-      <div class="metric" style="padding:10px 15px; min-width:unset;"><div class="metric-label" style="font-size:.65rem">Chưa duyệt</div><div class="metric-value" style="font-size:1.25rem">\${prog.unverified_count}</div></div>
-    </div>
-    <div class="progress-wrap" style="margin-bottom:16px"><div class="progress-bar" style="width:\${pct}%"></div></div>
-    
     <div class="card-title" style="margin-top:4px">Lọc Triples</div>
     <div class="form-group">
       <label>is_checked</label>
@@ -168,7 +180,11 @@ function renderTripleDetail(row: any) {
           </div>
           <div class="form-group" style="margin-bottom:12px">
             <label style="display:flex; align-items:center; gap:6px; margin-bottom:6px"><span class="badge badge-blue">Relation</span></label>
-            <input type="text" id="edit-rel" value="${row.relation ? String(row.relation).replace(/"/g, '&quot;') : ''}" style="font-family:monospace" />
+            <select id="edit-rel" style="font-family:monospace">
+              <option value="">-- Trống --</option>
+              ${relations.map(r => `<option value="${r.replace(/"/g, '&quot;')}" ${r === row.relation ? 'selected' : ''}>${r}</option>`).join('')}
+              ${row.relation && !relations.includes(row.relation) ? `<option value="${String(row.relation).replace(/"/g, '&quot;')}" selected>${row.relation} (Unknown)</option>` : ''}
+            </select>
           </div>
           <div class="form-group" style="margin-bottom:12px">
             <label style="display:flex; align-items:center; gap:6px; margin-bottom:6px"><span class="badge badge-gray">Target</span></label>
@@ -265,7 +281,7 @@ async function saveTriple() {
   }
   
   const subInp = document.getElementById('edit-sub') as HTMLTextAreaElement;
-  const relInp = document.getElementById('edit-rel') as HTMLInputElement;
+  const relInp = document.getElementById('edit-rel') as HTMLSelectElement;
   const targInp = document.getElementById('edit-targ') as HTMLTextAreaElement;
 
   btn.disabled = true; btn.textContent = 'Đang lưu…';
@@ -287,15 +303,33 @@ async function saveTriple() {
     alertEl.innerHTML = '<div class="alert alert-success">✓ Đã lưu triple.</div>';
     // Update local state
     if (tripleMap[currentId]) {
-      tripleMap[currentId].is_checked = verdict !== 'unsure';
+      const wasChecked = tripleMap[currentId].is_checked;
+      const isCheckedNow = verdict !== 'unsure';
+      
+      tripleMap[currentId].is_checked = isCheckedNow;
       tripleMap[currentId].is_drop = verdict === 'invalid';
       tripleMap[currentId].subject = subInp.value;
       tripleMap[currentId].relation = relInp.value;
       tripleMap[currentId].target = targInp.value;
+      
+      if (wasChecked !== isCheckedNow) {
+        if (isCheckedNow) {
+          globalProg.verified_count++;
+          globalProg.unverified_count--;
+        } else {
+          globalProg.verified_count--;
+          globalProg.unverified_count++;
+        }
+        renderProgressBar();
+      }
     }
-    const idx = allIds.findIndex(id => String(id) === String(currentId));
-    if (idx + 1 < allIds.length) {
-      setTimeout(() => selectTriple(String(allIds[idx + 1])), 500);
+    if (verdict === 'unsure') {
+      setTimeout(() => selectTriple(String(currentId)), 500);
+    } else {
+      const idx = allIds.findIndex(id => String(id) === String(currentId));
+      if (idx + 1 < allIds.length) {
+        setTimeout(() => selectTriple(String(allIds[idx + 1])), 500);
+      }
     }
   } catch (err: any) {
     alertEl.innerHTML = `<div class="alert alert-error">Lỗi: ${err.message}</div>`;

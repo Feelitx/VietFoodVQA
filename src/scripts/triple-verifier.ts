@@ -108,6 +108,13 @@ async function loadList() {
     const rows: any[] = await (await fetch(`/api/kg/list?${p}`)).json();
     allIds = rows.map(r => r.triple_id);
     tripleMap = Object.fromEntries(rows.map(r => [r.triple_id, r]));
+    
+    // Fetch scope-specific progress ignoring is_checked
+    const progParams = new URLSearchParams({ relation:f.relation, search:f.search });
+    if (f.start_id) progParams.set('start_id', f.start_id);
+    if (f.end_id) progParams.set('end_id', f.end_id);
+    try { globalProg = await(await fetch(`/api/kg/progress?${progParams}`)).json(); } catch {}
+    renderProgressBar();
   } catch {
     setRoot('<div class="alert alert-error">Không tải được danh sách triple.</div>');
     return;
@@ -214,10 +221,12 @@ function renderTripleDetail(row: any) {
     </div>
 
     <hr/>
-    <div id="save-alert"></div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-primary" id="btn-save-triple" style="flex:1">💾 Lưu triple</button>
-      <button class="btn btn-secondary" id="btn-next-triple" ${idx+1>=allIds.length?'disabled':''}>Tiếp →</button>
+    <div class="sticky bottom-0 z-20 py-4 bg-slate-50/90 dark:bg-zinc-950/90 backdrop-blur-md border-t border-slate-200 dark:border-white/10 -mx-6 px-6 md:-mx-10 md:px-10 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] dark:shadow-[0_-5px_30px_rgba(0,0,0,0.5)]">
+      <div id="save-alert"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" id="btn-save-triple" style="flex:1">💾 Lưu triple</button>
+        <button class="btn btn-secondary" id="btn-next-triple" ${idx+1>=allIds.length?'disabled':''}>Tiếp →</button>
+      </div>
     </div>
   `);
 

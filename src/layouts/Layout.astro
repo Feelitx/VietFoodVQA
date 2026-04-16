@@ -21,16 +21,16 @@
 
       @layer components {
         .app { @apply flex w-full h-screen; }
-        .sidebar { @apply w-72 shrink-0 bg-white/60 dark:bg-zinc-950/80 backdrop-blur-xl border-r border-slate-200 dark:border-white/[0.04] flex flex-col h-full overflow-hidden; }
-        .sidebar-logo { @apply p-6 border-b border-slate-200 dark:border-white/[0.04]; }
+        .sidebar { @apply w-72 shrink-0 bg-white/60 dark:bg-zinc-950/80 backdrop-blur-xl border-r border-slate-200 dark:border-white/10 flex flex-col h-full overflow-hidden; }
+        .sidebar-logo { @apply p-6 border-b border-slate-200 dark:border-white/10; }
         .sidebar-logo > div { @apply text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400 tracking-tight; }
         .sidebar-logo span { @apply block mt-1 text-xs font-medium text-slate-500 dark:text-zinc-500; }
         
         .nav { @apply p-4 space-y-1; }
         .nav a { @apply flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-zinc-400 font-medium text-sm transition-all duration-300; }
-        .nav a:hover { @apply bg-slate-100 dark:bg-white/[0.03] text-slate-900 dark:text-zinc-100; }
-        .nav a.active { @apply bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.2)]; }
-        .nav-divider { @apply h-px bg-slate-200 dark:bg-white/[0.04] my-4; }
+        .nav a:hover { @apply bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-zinc-100; }
+        .nav a.active { @apply bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.2)]; }
+        .nav-divider { @apply h-px bg-slate-200 dark:bg-white/10 my-4; }
         
         .sidebar-controls { @apply flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar; }
         
@@ -38,8 +38,8 @@
         .main-inner { @apply p-6 md:p-10 max-w-7xl mx-auto; }
         .page-title { @apply text-3xl font-bold text-slate-800 dark:text-white mb-8 tracking-tight; }
         
-        .card { @apply bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-white/[0.04] rounded-2xl p-6 shadow-xl mb-5 space-y-4 transition-all hover:bg-white/90 dark:hover:bg-zinc-900/60 hover:border-slate-300 dark:hover:border-white/[0.08]; }
-        .card-title { @apply text-xs font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-2; }
+        .card { @apply bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-xl mb-5 space-y-4 transition-all hover:bg-white/90 dark:hover:bg-zinc-900/60 hover:border-slate-300 dark:hover:border-white/20; }
+        .card-title { @apply text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-2; }
         
         label { @apply block text-sm font-medium text-slate-700 dark:text-zinc-400 mb-1.5; }
         input[type="text"], input[type="number"], select, textarea {
@@ -54,11 +54,11 @@
         .btn-full { @apply w-full; }
         
         .metrics { @apply flex flex-wrap gap-4 mb-6; }
-        .metric { @apply flex-1 min-w-[120px] bg-white/70 dark:bg-zinc-900/50 backdrop-blur-md border border-slate-200 dark:border-white/[0.04] rounded-2xl p-5 hover:border-slate-300 dark:hover:border-white/[0.08] transition-all; }
+        .metric { @apply flex-1 min-w-[120px] bg-white/70 dark:bg-zinc-900/50 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl p-5 hover:border-slate-300 dark:hover:border-white/20 transition-all; }
         .metric-label { @apply text-xs font-semibold text-slate-500 dark:text-zinc-500 uppercase tracking-wider; }
         .metric-value { @apply text-3xl font-bold text-slate-800 dark:text-white mt-1; }
         
-        .progress-wrap { @apply h-2 w-full bg-slate-200 dark:bg-white/[0.05] rounded-full overflow-hidden my-3 shadow-inner; }
+        .progress-wrap { @apply h-2 w-full bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden my-3 shadow-inner; }
         .progress-bar { @apply h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-700 ease-out; }
         
         .badge { @apply inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide border; }
@@ -93,19 +93,19 @@
         .radio-opt.checked { @apply bg-indigo-50 dark:bg-indigo-500/15 border-indigo-400 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.2)]; }
         
         .img-preview { @apply w-full rounded-2xl object-cover max-h-[500px] border border-slate-200 dark:border-white/10 shadow-2xl; }
-        .triple-card { @apply bg-white/40 dark:bg-zinc-900/30 border border-slate-200 dark:border-white/[0.04] rounded-xl p-4 mb-3 transition-all hover:border-indigo-300 dark:hover:border-indigo-400/30 hover:bg-white/80 dark:hover:bg-zinc-900/60 hover:shadow-lg hover:shadow-indigo-500/5; }
+        .triple-card { @apply bg-white/40 dark:bg-zinc-900/30 border border-slate-200 dark:border-white/10 rounded-xl p-4 mb-3 transition-all hover:border-indigo-300 dark:hover:border-indigo-400/30 hover:bg-white/80 dark:hover:bg-zinc-900/60 hover:shadow-lg hover:shadow-indigo-500/5; }
         .triple-text { @apply font-semibold text-sm text-slate-800 dark:text-zinc-200 mb-2; }
         
         .custom-scrollbar::-webkit-scrollbar { @apply w-2; }
         .custom-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-white/10 rounded-full hover:bg-slate-400 dark:hover:bg-white/20 transition-all; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-white/15 rounded-full hover:bg-slate-400 dark:hover:bg-white/25 transition-all; }
         
         .muted { @apply text-slate-500 dark:text-zinc-400 text-sm; }
         .breadcrumb { @apply flex items-center gap-2 flex-wrap text-sm text-slate-600 dark:text-zinc-400 mb-6 bg-white/70 dark:bg-zinc-900/40 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 backdrop-blur-md w-fit; }
         .breadcrumb b { @apply text-slate-900 dark:text-zinc-200; }
         .nav-pos { @apply text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-2 text-right; }
 
-        hr { @apply border-t border-slate-200 dark:border-white/10 my-8; }
+        hr { @apply border-t border-slate-200 dark:border-white/15 my-8; }
 
         .loading-center { @apply flex justify-center py-20; }
         .spinner { @apply w-10 h-10 rounded-full border-[3px] border-slate-200 dark:border-white/10 border-t-indigo-600 dark:border-t-indigo-500 animate-spin; }

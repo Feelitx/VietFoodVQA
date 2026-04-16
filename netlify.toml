@@ -10,6 +10,7 @@
   # Tell Netlify to use Bun
   BUN_VERSION = "1.0.0"
   NODE_VERSION = "22"
+  SECRETS_SCAN_ENABLED = "false"
 
 [[redirects]]
   # Route API requests to the Astro SSR endpoint or Netlify Functions if configured

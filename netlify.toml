@@ -9,7 +9,7 @@
 [context.production.environment]
   # Tell Netlify to use Bun
   BUN_VERSION = "1.0.0"
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
 
 [[redirects]]
   # Route API requests to the Astro SSR endpoint or Netlify Functions if configured
